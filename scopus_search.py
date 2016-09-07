@@ -13,18 +13,11 @@ CSV_COLUMN_HEADERS = (
     "Abstract Link", "Scopus Link", "Cited-By Link"
 )
 
-# fields determined from this table:
-# http://api.elsevier.com/documentation/search/SCOPUSSearchViews.htm
-FIELDS = "dc:title,authid,given-name,surname,prism:coverDate,citedby-count," + \
-         "prism:publicationName,prism:pageRange,prism:doi,pubmed-id," + \
-         "dc:identifier,eid,subtypeDescription,fund-acr,link-self,link-scopus," + \
-         "link-scopus-citedby"
-
 def query_scopus(query_id, query_str, outfile):
 
     headers = {"X-ELS-APIKey": SCOPUS_API_KEY}
     params = {
-        "field": FIELDS,
+        "view": "COMPLETE",
         "query": query_str,
         "count": 100,
         "start": 0
@@ -68,20 +61,27 @@ def query_scopus(query_id, query_str, outfile):
                 author_list = entry.get("author", [])
 
                 for author in author_list:
-                    try:
-                        name = author.get("given-name", "") + " " + \
-                               author.get("surname", "")
-                        author_set.add(name)
-                    except:
-                        continue
+                    firstname = author.get("given-name", "")
+                    lastname = author.get("surname", "")
 
-                if author_list[-1].get("auth_id") in query_ids:
-                    # If last author in the author list is a PI,
-                    # set PI to last listed author
-                    pi = author_list[-1].get("surname", "")
-                else:
-                    # Else, the PI is the first in the author list
+                    if firstname is None:
+                        firstname = ""
+
+                    if lastname is None:
+                        lastname = ""
+
+                    author_set.add(firstname + " " + lastname)
+
+                if author_list[0].get("authid") in query_ids:
+                    # If first author in the author list is a PI,
+                    # set PI to first listed author
                     pi = author_list[0].get("surname", "")
+                else:
+                    # Else, the PI is the author from the list nearest the end
+                    for author in reversed(author_list):
+                        if author.get("authid") in query_ids:
+                            pi = author.get("surname", "")
+                            break
 
                 date = entry.get("prism:coverDate", "")
                 citedby_count = entry.get("citedby-count", 0)
@@ -89,7 +89,7 @@ def query_scopus(query_id, query_str, outfile):
                 page_range = entry.get("prism:pageRange", "")
                 doi = entry.get("prism:doi", "")
                 pubmed_id = entry.get("pubmed-id", "")
-                scopus_id = entry.get("dc:identifier", "")
+                scopus_id = entry.get("dc:identifier", "").split(":")[1]
                 eid = entry.get("eid", "")
                 subtype = entry.get("subtypeDescription", "")
                 fund_acr = entry.get("fund-acr", "")
