@@ -159,7 +159,7 @@ def create_query(fname, start):
 if __name__ == "__main__":
     description = """Query Scopus Search API and output to csv file."""
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("--ids", dest="fname", help="Scopus search file",
+    parser.add_argument("--ids", dest="fname", help="File with SCOPUS AU-IDs to query",
                         metavar="idfile", required=True)
     parser.add_argument("--out", dest="outfile", help="Output CSV filename",
                         metavar="output", required=True)
