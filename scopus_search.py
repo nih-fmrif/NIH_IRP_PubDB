@@ -30,6 +30,7 @@ def query_scopus(query_ids, query_str, outfile):
         entry_count = 0
         page_count = 0
 
+        print("[+] Sending query to SCOPUS Search API...")
         while True:
             r = requests.get(
                 SCOPUS_SEARCH_API_URL,
@@ -130,13 +131,15 @@ def query_scopus(query_ids, query_str, outfile):
             # update "start" index for "next" page of results
             params["start"] = start + per_page
 
-        print("%d results on %d pages" % (entry_count, page_count))
+        print("[+] %d results on %d pages. Done!" % (entry_count, page_count))
 
 
-def create_query(fname):
+def create_query(fname, start):
+    """Generate query IDs and query string from input file and start date."""
     query_ids = set()
     query_str = ""
 
+    print("[+] Gathering AU-IDs...")
     with open(fname, 'r') as f:
         for line in f:
             if not line.startswith("#"):
@@ -148,16 +151,20 @@ def create_query(fname):
 
     # Append the last AU-ID without the trailing "OR", and the date search
     # parameter
-    # TODO: remove hard coded date
-    query_str += "AU-ID(" + list(query_ids)[-1] + ") AND ORIG-LOAD-DATE AFT 20150807"
+    print("[+] Creating SCOPUS query string...")
+    query_str += "AU-ID(" + list(query_ids)[-1] + ") AND ORIG-LOAD-DATE AFT " + start
     return query_ids, query_str
 
 
 if __name__ == "__main__":
     description = """Query Scopus Search API and output to csv file."""
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("fname", help="Scopus search file")
-    parser.add_argument("outfile", help="Output CSV filename")
+    parser.add_argument("--ids", dest="fname", help="Scopus search file",
+                        metavar="idfile", required=True)
+    parser.add_argument("--out", dest="outfile", help="Output CSV filename",
+                        metavar="output", required=True)
+    parser.add_argument("--start", dest="start", help="Start date for query (YYYYMMDD).",
+                        metavar="startdate", required=True)
     # TODO: add args for file query or cli query
     args = parser.parse_args()
 
@@ -166,5 +173,5 @@ if __name__ == "__main__":
     if not SCOPUS_API_KEY:
         sys.exit("You must set the SCOPUS_API_KEY environment variable.")
 
-    query_ids, query_str = create_query(args.fname)
+    query_ids, query_str = create_query(args.fname, args.start)
     query_scopus(query_ids, query_str, args.outfile)
