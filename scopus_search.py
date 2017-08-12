@@ -13,7 +13,7 @@ CSV_COLUMN_HEADERS = (
     "Abstract Link", "Scopus Link", "Cited-By Link"
 )
 
-def query_scopus(query_id, query_str, outfile):
+def query_scopus(query_ids, query_str, outfile):
 
     headers = {"X-ELS-APIKey": SCOPUS_API_KEY}
     params = {
