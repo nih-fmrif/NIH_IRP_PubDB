@@ -2,7 +2,19 @@
 
 An application to catalog and measure NIH IRP publications.
 
-### Usage
+### SCOPUS Search
+
+```
+usage: scopus_search.py [-h] --ids idfile --out output --start startdate
+
+Query Scopus Search API and output to csv file.
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --ids idfile       Scopus search file
+  --out output       Output CSV filename
+  --start startdate  Start date for query (YYYYMMDD).
+```
 
 1. Export your `SCOPUS_API_KEY` environment variable:
 
@@ -24,5 +36,5 @@ export SCOPUS_API_KEY=1234567890abcdef1234567890abcdef
    and the second argument is the output csv file:
 
 ```
-python scopus_search.py au-ids.txt output.csv
+python scopus_search.py --ids au-ids.txt --out output.csv --start 20160807
 ```
