@@ -2,7 +2,9 @@
 
 An application to catalog and measure NIH IRP publications.
 
-### SCOPUS Search
+### scopus_search.py
+
+Search SCOPUS for publications given a list of AU-IDs.
 
 ```
 usage: scopus_search.py [-h] --ids idfile --out output --start startdate
@@ -37,4 +39,33 @@ export SCOPUS_API_KEY=1234567890abcdef1234567890abcdef
 
 ```
 python scopus_search.py --ids au-ids.txt --out output.csv --start 20160807
+```
+
+### update_citation_count.py
+
+Given a CSV file with an EID for each publication, write to a CSV file with
+updated citation counts for each publication.
+
+```
+usage: update_citation_counts.py [-h] --input csvfile --output outfile
+
+Take CSV file with EID column and output CSV file with updated citation
+counts.
+
+optional arguments:
+  -h, --help        show this help message and exit
+  --input csvfile   Citation count csv filename
+  --output outfile  Output CSV filename
+```
+
+1. Export your `SCOPUS_API_KEY` environment variable:
+
+```
+export SCOPUS_API_KEY=1234567890abcdef1234567890abcdef
+```
+
+2. Run the **update_citation_count.py**: 
+
+```
+python update_citation_count.py --input old_publist.csv --output updated_publist.csv
 ```
