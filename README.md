@@ -41,7 +41,7 @@ export SCOPUS_API_KEY=1234567890abcdef1234567890abcdef
 python scopus_search.py --ids au-ids.txt --out output.csv --start 20160807
 ```
 
-### update_citation_count.py
+### update_citation_counts.py
 
 Given a CSV file with an EID for each publication, write to a CSV file with
 updated citation counts for each publication.
@@ -64,8 +64,8 @@ optional arguments:
 export SCOPUS_API_KEY=1234567890abcdef1234567890abcdef
 ```
 
-2. Run the **update_citation_count.py**: 
+2. Run the **update_citation_counts.py**: 
 
 ```
-python update_citation_count.py --input old_publist.csv --output updated_publist.csv
+python update_citation_counts.py --input old_publist.csv --output updated_publist.csv
 ```
