@@ -1,3 +1,5 @@
+# Lauren Atlas
+57200609045
 # Chris Baker
 55175093900
 # Peter Bandettini
@@ -9,11 +11,15 @@
 35350708000
 56855135500
 6507969098
+# Bibiana Bielekova
+55917319300
 # Robert James Blair
 25647145100
 15065008000
 7201371910
 56704360300
+# Catherine Bushnell
+7005808290
 # Leonardo Cohen
 7403928815
 56898418100
@@ -50,16 +56,20 @@
 35446495000
 56491896300
 55524493600
-# Henry McFarland (affiliation does not show as NIMH)
+# Henry McFarland 
 35419266700
 # Elisha Merriam
 6602493832
 # Mortimer Mishkin
 7007041182
 56915435000
+# Abdolreza Reza Momenan
+6701504429
 # Elisabeth Murray
 7202670029
 56697335100
+# Avinda Nath
+7102102492
 # Allison Nugent
 7005708239
 # Carlo Pierpaoli
@@ -73,15 +83,25 @@
 7102502816
 56650044800
 56927814900
-# Daniel Reich (affiliation does not say NIMH)
+#Armin Raznahan
+18537910900
+# Daniel Reich 
 7102312699
+#Peter Schmidt
+55355362400
+# Philip Shaw
+56253635800
 # Jie Shen
 7404929791
+#Argyrios Stringaris
+14822602500
 # Susan Swedo
 7005115939
 35357292600
 7005115937
 56800301300
+# Lalith Talagala
+6602267436
 # William Theodore
 7005205047
 56491605600
