@@ -19,7 +19,7 @@ def query_scopus(query_ids, query_str, outfile):
     params = {
         "view": "COMPLETE",
         "query": query_str,
-        "count": 100,
+        "count": 25,
         "start": 0
     }
 
