@@ -72,6 +72,8 @@
 7102102492
 # Allison Nugent
 7005708239
+# Francisco Pereira
+35194757000
 # Carlo Pierpaoli
 6701588878
 # Daniel Pine
@@ -100,6 +102,10 @@
 35357292600
 7005115937
 56800301300
+# Adam Thomas
+27068090300
+# Audrey Thurm
+6602651169
 # Lalith Talagala
 6602267436
 # William Theodore
