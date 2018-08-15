@@ -110,9 +110,9 @@ def query_scopus(query_ids, query_str, outfile):
                 authors = ";".join(author_set)
 
                 writer.writerow((
-                    title.encode("utf-8"), pi.encode("utf-8"),
-                    authors.encode("utf-8"), date, citedby_count,
-                    pub.encode("utf-8"), page_range, doi, pubmed_id, scopus_id,
+                    title, pi,
+                    authors, date, citedby_count,
+                    pub, page_range, doi, pubmed_id, scopus_id,
                     eid, subtype, fund_acr, abstract_link, scopus_link,
                     citedby_link
                 ))
