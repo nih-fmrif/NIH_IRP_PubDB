@@ -54,7 +54,6 @@
 # Alan Koretsky
 7005144462
 56725238200
-# No Author ID found (need to look this one up)
 35262168300
 # Lawrence Latour
 7003471668
