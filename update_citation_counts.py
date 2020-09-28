@@ -5,53 +5,40 @@ import csv
 import os
 import requests
 import sys
-import time
+import pandas as pd
 
 SCOPUS_SEARCH_API_URL = "http://api.elsevier.com/content/search/scopus"
+CSV_COLUMN_HEADERS = (
+    "Title", "PI", "Authors", "Date", "Cited-By Count", "Source Title", "Page Range",
+    "DOI", "PubMed ID", "Scopus ID", "EID", "Type", "Funding Agency",
+    "Abstract Link", "Scopus Link", "Cited-By Link"
+)
 
-def get_eids_from_file(fname):
-    """Return a list of EIDs given a csv file of citation counts."""
-    _eids = []
-    print("[+] Get list of EIDs from %s..." % fname)
-    with open(fname) as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            _eids.append(row["EID"])
-    return _eids
+def query_scopus(eids, outfile):
+    auth_ids = set()
+    missed = []
+    with open('au-ids.txt', 'r') as f:
+        for line in f:
+            if not line.startswith("#"):
+                auth_ids.add(line.strip())
 
-
-def scopus_query_citation_count(eidlist):
-    """Take a list of EIDs and return a dictionary of EID -> citation_count
-    mapping."""
-    eiddict = {}
-    failed = []
-    failed_count = 0
-    max_failed_attempts = 5
     headers = {"X-ELS-APIKey": SCOPUS_API_KEY}
 
-    sys.stdout.write("[+] Query EIDs from SCOPUS Search API")
-    sys.stdout.flush()
+    with open(outfile, "w") as output:
+        writer = csv.writer(output)
+        writer.writerow(CSV_COLUMN_HEADERS)
 
-    while failed_count < max_failed_attempts:
-        if failed_count == 0:
-            eidlist = eidlist
-        else:
-            eidlist = failed
-            sys.stdout.write("[+] Retrying failed EIDs from SCOPUS Search API")
-            sys.stdout.flush()
-
-        for eid in eidlist:
+        for eid in eids:
             params = {
-                "field": "eid,citedby-count",
-                "query": "eid(" + eid + ")"
+                "view": "COMPLETE",
+                "query": "eid(" + str(eid) + ")",
             }
 
             try:
                 r = requests.get(
                     SCOPUS_SEARCH_API_URL,
                     params=params,
-                    headers=headers,
-                    timeout=3
+                    headers=headers
                 )
             except requests.exceptions.Timeout:
                 sys.stdout.write("T")
@@ -61,89 +48,121 @@ def scopus_query_citation_count(eidlist):
                 continue
 
             if r.status_code != 200:
-                sys.stdout.write("F")
-                sys.stdout.flush()
-
-                if eid not in failed:
-                    failed.append(eid)
-
-                time.sleep(2)
-                continue
-
-            if failed_count > 0:
-                failed.remove(eid)
+                print("Error:")
+                print(r.reason)
+                break
 
             body = r.json()
             results = body.get("search-results")
 
             if results is None:
-                sys.stdout.write("N")
-                sys.stdout.flush()
+                print("Error:")
+                print(body)
+                break
+
+            entry = results.get('entry')[0]
+            title = entry.get("dc:title", "")
+
+            author_set = set()
+
+            author_list = entry.get("author", [])
+
+            for author in author_list:
+                firstname = author.get("given-name", "")
+                lastname = author.get("surname", "")
+
+                if firstname is None:
+                    firstname = ""
+
+                if lastname is None:
+                    lastname = ""
+
+                author_set.add(firstname + " " + lastname)
+
+
+            try:
+                if author_list[0].get("authid") in auth_ids:
+                    # If first author in the author list is a PI,
+                    # set PI to first listed author
+                    pi = author_list[0].get("surname", "")
+                else:
+                    # Else, the PI is the author from the list nearest the end
+                    for author in reversed(author_list):
+                        if author.get("authid") in auth_ids:
+                            pi = author.get("surname", "")
+            except:
+                print(eid)
+                if eid not in missed:
+                    missed.append(eid)
+                pi = 'NA'
                 continue
 
-            # Extract information for each result on this page
-            entry = results.get("entry")[0]
-            eid = entry.get("eid")
-            citedby_count = entry.get("citedby-count", "0")
+            date = entry.get("prism:coverDate", "")
+            citedby_count = entry.get("citedby-count", 0)
+            pub = entry.get("prism:publicationName", "")
+            page_range = entry.get("prism:pageRange", "")
+            doi = entry.get("prism:doi", "")
+            pubmed_id = entry.get("pubmed-id", "")
+            try:
+                scopus_id = entry.get("dc:identifier", "").split(":")[1]
+            except:
+                print(eid)
+                if eid not in missed:
+                    missed.append(eid)
+                scopus_id = 'NA'
+                continue
 
-            if eid:
-                eiddict.update({eid: citedby_count})
-                sys.stdout.write(".")
-                sys.stdout.flush()
+            eid = entry.get("eid", "")
+            subtype = entry.get("subtypeDescription", "")
+            fund_acr = entry.get("fund-acr", "")
 
-        if failed:
-            failed_count += 1
-            print()
+            abstract_link = ""
+            scopus_link = ""
+            citedby_link = ""
 
-    return eiddict
+            for linkobj in entry["link"]:
+                if linkobj["@ref"] == "self":
+                    abstract_link = linkobj["@href"]
+                if linkobj["@ref"] == "scopus":
+                    scopus_link = linkobj["@href"]
+                if linkobj["@ref"] == "scopus-citedby":
+                    citedby_link = linkobj["@href"]
+
+            authors = ";".join(author_set)
+
+            writer.writerow((
+                title, pi,
+                authors, date, citedby_count,
+                pub, page_range, doi, pubmed_id, scopus_id,
+                eid, subtype, fund_acr, abstract_link, scopus_link,
+                citedby_link
+            ))
+
+    with open('missed_edids.txt', 'w') as f:
+        for item in missed:
+            f.write("%s\n" % item)
 
 
-def write_csvfile(fname, output, eiddict):
-    """Writes input csv file with the Cited By column updated."""
-    print("[+] Writing to updated citation counts to %s" % output)
-    with open(fname) as csvfile:
-        reader = csv.DictReader(csvfile)
-        fields = reader.fieldnames
-        with open(output, "w") as outfile:
-            fieldnames = fields
-            writer = csv.DictWriter(outfile, fieldnames=fieldnames)
-            writer.writeheader()
+def get_eids(fname):
+    """pull the eids whose data we desire"""
+    query_ids = set()
+    query_str = ""
 
-            for row in reader:
-                old_cited_by = row["Cited By"]
-                new_cited_by = eiddict.get(row["EID"])
-                if not new_cited_by:
-                    new_cited_by = old_cited_by
+    print("[+] Gathering EIDS")
+    dat = pd.read_csv(fname)
+    eids = dat.EID.tolist()
 
-                writer.writerow({
-                    "Cite Rank": row["Cite Rank"],
-                    "IC": row["IC"],
-                    "PI": row["PI"],
-                    "PI Count":row["PI Count"],
-                    "Authors": row["Authors"],
-                    "Title": row["Title"],
-                    "Year": row["Year"],
-                    "Source title": row["Source title"],
-                    "Cited By": new_cited_by,
-                    "DOI": row["DOI"],
-                    "Link": row["Link"],
-                    "PubMed ID": row["PubMed ID"],
-                    "Document Type": row["Document Type"],
-                    "EID": row["EID"],
-                    "SCOPUS_ID": row["SCOPUS_ID"],
-                    "API Abstract Link": row["API Abstract Link"],
-                    "Cited By Link": row["Cited By Link"],
-                })
+    return eids
 
 
 if __name__ == "__main__":
-    description = """Take CSV file with EID column and output CSV file with
-    updated citation counts."""
+    description = """Query Scopus Search API and output to csv file."""
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("--input", dest="fname", help="Citation count csv filename",
-                        metavar="csvfile", required=True)
-    parser.add_argument("--output", dest="output", help="Output CSV filename",
-                        metavar="outfile", required=True)
+    parser.add_argument("--ids", dest="fname", help="File with EIDs to query",
+                        metavar="idfile", required=True)
+    parser.add_argument("--out", dest="outfile", help="Output CSV filename",
+                        metavar="output", required=True)
+    # TODO: add args for file query or cli query
     args = parser.parse_args()
 
     SCOPUS_API_KEY = os.getenv("SCOPUS_API_KEY")
@@ -151,6 +170,5 @@ if __name__ == "__main__":
     if not SCOPUS_API_KEY:
         sys.exit("You must set the SCOPUS_API_KEY environment variable.")
 
-    eids = get_eids_from_file(args.fname)
-    eiddict = scopus_query_citation_count(eids)
-    write_csvfile(args.fname, args.output, eiddict)
+    eids = get_eids(args.fname)
+    query_scopus(eids, args.outfile)

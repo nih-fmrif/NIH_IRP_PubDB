@@ -2,6 +2,12 @@
 
 An application to catalog and measure NIH IRP publications.
 
+Assuming that the user is interested in updating these measures in subsequent years, it is a two-stage process.
+
+In the first stage, the `scopus_search.py` script takes as input a list of investigators, and returns all the papers listed in scopus since the specified date.
+
+In the second stage, the `update_citation_counts.py` script takes as input the file produced in the previous year, and pulls all the unique EID (paper identifiers), updating the citation counts for those articles. We have experienced EIDs that change a bit year-to-year (on the order of one or two percent). Consequently, this script will print (and write to disk) EIDs that are missed. It is up to the user to go through an manually correct these by, for instance, creating a new csv file with a column labeled `EID` and using this as input for `update_citation_counts.py`. 
+
 ### scopus_search.py
 
 Search SCOPUS for publications given a list of AU-IDs.

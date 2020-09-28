@@ -73,16 +73,19 @@ def query_scopus(query_ids, query_str, outfile):
 
                     author_set.add(firstname + " " + lastname)
 
-                if author_list[0].get("authid") in query_ids:
-                    # If first author in the author list is a PI,
-                    # set PI to first listed author
-                    pi = author_list[0].get("surname", "")
-                else:
-                    # Else, the PI is the author from the list nearest the end
-                    for author in reversed(author_list):
-                        if author.get("authid") in query_ids:
-                            pi = author.get("surname", "")
-                            break
+                try:
+                    if author_list[0].get("authid") in query_ids:
+                        # If first author in the author list is a PI,
+                        # set PI to first listed author
+                        pi = author_list[0].get("surname", "")
+                    else:
+                        # Else, the PI is the author from the list nearest the end
+                        for author in reversed(author_list):
+                            if author.get("authid") in query_ids:
+                                pi = author.get("surname", "")
+                                break
+                except:
+                    pi = ''
 
                 date = entry.get("prism:coverDate", "")
                 citedby_count = entry.get("citedby-count", 0)

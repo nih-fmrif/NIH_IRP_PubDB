@@ -20,9 +20,13 @@
 56704360300
 # Catherine Bushnell
 7005808290
+# Joyce Chung
+7404002698
 # Leonardo Cohen
 7403928815
 56898418100
+# Irene Cortese
+6701800722
 # Jeff Duyn
 35515600800
 # Mary Kay Floeter
@@ -43,15 +47,24 @@
 7005988771
 # Barry Horwitz
 35426728600
+# Sara Inati
+18233454300
+# Steven Jacobson
+56498497600
 # Alan Koretsky
 7005144462
 56725238200
-# No Author ID found (need to look this one up)
 35262168300
+# Lawrence Latour
+7003471668
 # Ellen Leibenluft
 16943112200
 56544188200
 56816576600
+# Lorenzo Leggio
+57203195661
+# Sarah Lisanby
+7004471427
 # Alex Martin
 35446495000
 56491896300
@@ -89,13 +102,13 @@
 18537910900
 # Daniel Reich 
 7102312699
-#Peter Schmidt
+# Peter Schmidt
 55355362400
 # Philip Shaw
 56253635800
 # Jie Shen
 7404929791
-#Argyrios Stringaris
+# Argyrios Stringaris
 14822602500
 # Susan Swedo
 7005115939
