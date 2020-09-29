@@ -2,11 +2,23 @@
 
 An application to catalog and measure NIH IRP publications.
 
-Assuming that the user is interested in updating these measures in subsequent years, it is a two-stage process.
+Assuming that the user is interested in updating these measures in subsequent years, follow these steps:
 
-In the first stage, the `scopus_search.py` script takes as input a list of investigators, and returns all the papers listed in scopus since the specified date.
+1. Check the authors in `data/raw/au_ids.txt` to ensure all PIs are represented. [Note1: we have discovered that some of the EIDs in this file returned data from investigators not in the IRP]
 
-In the second stage, the `update_citation_counts.py` script takes as input the file produced in the previous year, and pulls all the unique EID (paper identifiers), updating the citation counts for those articles. We have experienced EIDs that change a bit year-to-year (on the order of one or two percent). Consequently, this script will print (and write to disk) EIDs that are missed. It is up to the user to go through an manually correct these by, for instance, creating a new csv file with a column labeled `EID` and using this as input for `update_citation_counts.py`. 
+2. Obtain a listing of the previously used publications in this analysis (henceforth: *old publications*. See complete files at `/data/complete`).
+
+3. Use the `scopus_search.py` script to obtain all the papers listed in scopus since a given date (henceforth: *new publications*). This script takes as input a list of investigators, and a cutoff date. An example output from this script is located at `/data/interim/output_file.csv`. [Note2: we have found that this function still returns some papers that precede the cutoff date]
+
+4. Clean up the new publications with the `01.0-TAR-irp_pubcount.ipynb` notebook (described further below), and distribute to the investigators so they can mark which papers of theirs used the scanners. [here](https://docs.google.com/spreadsheets/d/1w_00-0GV0OHPJxf1FsTi4oVQzbqitz6xmB5-1qMx-vQ/edit#gid=339438628) is a version of this spreadsheet from 2019. 
+
+5. Use the `update_citation_counts.py` script to update the number of citations for the *old publications*. This script takes as input the file produced in the previous year, and pulls all the unique EID (paper identifiers), updating the citation counts for those articles. We have experienced EIDs that change a bit year-to-year (on the order of one or two percent). Consequently, this script will print (and write to disk) EIDs that are missed. It is up to the user to go through an manually correct these by, for instance, creating a new csv file with a column labeled `EID` and using this as input for a second run of `update_citation_counts.py`. The 2020 update from the 2019 papers is found at `data/interim/2019_complete_update_2020.csv`.
+
+6. Download the completed tabulation of which *new publications* used the scanners from the google doc. The csv from 2020 is found at `/data/interim/New Publications from FMRIF Investigators Aug 2020 - 2020_new_papers`.
+
+7. The notebook `01.0-TAR-irp_pubcount.ipynb` aggregates the data from the previous steps and generates a paragraph that describes the "productivity" of the reseaerch group as a whole. It also writes out a complete listing of papers for use next year. This notebook will rely on a PI <-> IC linking file (`/data/raw/investigator_ics.csv`)
+
+There have been uneven historical attempts to remove editorials, reviews, errata, and the like. The above does not attempt to describe how that might happen.
 
 ### scopus_search.py
 

@@ -31,7 +31,7 @@ def query_scopus(eids, outfile):
         for eid in eids:
             params = {
                 "view": "COMPLETE",
-                "query": "eid(" + str(eid) + ")",
+                "query": "eid(" + str(eid[0]) + ")",
             }
 
             try:
@@ -80,22 +80,7 @@ def query_scopus(eids, outfile):
                 author_set.add(firstname + " " + lastname)
 
 
-            try:
-                if author_list[0].get("authid") in auth_ids:
-                    # If first author in the author list is a PI,
-                    # set PI to first listed author
-                    pi = author_list[0].get("surname", "")
-                else:
-                    # Else, the PI is the author from the list nearest the end
-                    for author in reversed(author_list):
-                        if author.get("authid") in auth_ids:
-                            pi = author.get("surname", "")
-            except:
-                print(eid)
-                if eid not in missed:
-                    missed.append(eid)
-                pi = 'NA'
-                continue
+            pi = eid[1]
 
             date = entry.get("prism:coverDate", "")
             citedby_count = entry.get("citedby-count", 0)
@@ -112,7 +97,7 @@ def query_scopus(eids, outfile):
                 scopus_id = 'NA'
                 continue
 
-            eid = entry.get("eid", "")
+            #eid = entry.get("eid", "")
             subtype = entry.get("subtypeDescription", "")
             fund_acr = entry.get("fund-acr", "")
 
@@ -140,7 +125,7 @@ def query_scopus(eids, outfile):
 
     with open('missed_edids.txt', 'w') as f:
         for item in missed:
-            f.write("%s\n" % item)
+            f.write("%s\n" % ','.join(item))
 
 
 def get_eids(fname):
@@ -150,7 +135,11 @@ def get_eids(fname):
 
     print("[+] Gathering EIDS")
     dat = pd.read_csv(fname)
-    eids = dat.EID.tolist()
+    if 'PI' in dat.columns.tolist():
+        eids = [tuple(x) for x in dat[['EID', 'PI']].to_numpy()]
+    else:
+        dat.rename(columns={'SearchedAuthor':'PI'}, inplace=True)
+        eids = [tuple(x) for x in dat[['EID', 'PI']].to_numpy()]
 
     return eids
 
